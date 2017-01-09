@@ -56,7 +56,8 @@ public class Hovedprogram {
 			FileWriter fil = new FileWriter("Rå data.txt", true);
 			PrintWriter ud = new PrintWriter(fil);
 			for (int i = 0; i < liste.size(); i++) {
-				ud.println(i + ": " + liste.get(i));
+				//ud.println(i + ": " + liste.get(i));
+				ud.println(liste.get(i));
 			}
 
 			ud.close();
@@ -118,19 +119,21 @@ public class Hovedprogram {
 
 		listen = t.getValue(sampleSize);
 		for (String p : listen) {
+			p = p.trim();
+			try{ Double.parseDouble(p); } catch(NumberFormatException e){ continue; }
+			//if(Double.isNaN(Double.parseDouble(p))) continue;
 			data.add(Double.parseDouble(p));
 		}
 		System.out.println("Vi er begyndt!");
 		pulsB = new Pulsberegner(sampleSize, sampleTime);
 		System.out.println("Pulsen er inden start: " + puls);
 
-		sampleSize = 200;
+		sampleSize = 600;
 		for (;;) {
-			for (int i = 0; i < sampleSize; i++) {
-				data.remove(i);
-			}
+			data.subList(0, sampleSize).clear();
 
 			listen = t.getValue(sampleSize);
+			
 			double t1 = System.currentTimeMillis();
 			for (String p : listen) {
 				// System.out.println(p);
@@ -140,7 +143,7 @@ public class Hovedprogram {
 
 			puls = pulsB.beregnPuls(data);
 			gemListeTilFil(data);
-
+			
 			if (puls == 7 && prevPuls != 0)
 				puls = prevPuls;
 			if (puls > 0) {

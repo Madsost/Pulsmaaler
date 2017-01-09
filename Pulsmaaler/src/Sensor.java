@@ -84,13 +84,15 @@ public class Sensor {
 				e1.printStackTrace();
 			}
 			// Udskriver et punktum for hvert 200 måling (ca. hvert sekund)
-			if (test) {
-				if (målinger.size() - point >= 200) {
+			if (målinger.size() - point >= 200) {
 					System.out.print(".");
 					point = (målinger.size() / 200) * 200;
 				}
+			if (test) {
 				System.out.println(målinger.size());
 			}
+			
+		// størrelsen kan godt være større end sampleSize!
 		} while (målinger.size() <= sampleSize);
 		System.out.println();
 	}

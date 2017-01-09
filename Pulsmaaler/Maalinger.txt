@@ -1,0 +1,5 @@
+Tid 0s: 76.60 bpm
+Tid 3s: 76.56 bpm
+Tid 9s: 15.98 bpm
+Tid 12s: 76.58 bpm
+Tid 15s: 75.95 bpm
