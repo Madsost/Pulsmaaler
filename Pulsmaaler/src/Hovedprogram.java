@@ -8,7 +8,7 @@ public class Hovedprogram {
 	public static int sampleTime = 5;
 	public static int sampleSize;
 	public static ArrayList<Double> data;
-	
+	/*
 	public static returParameter førsteKonvertering(parameter){
 		// Konverter den første måling (fx 1000 målinger)
 		// Indfør tjek på om målingen faktisk er et tal 
@@ -28,7 +28,7 @@ public class Hovedprogram {
 		// hvis filen eksisterer, slet den
 		// ellers opret filen
 	}
-	
+	*/
 	/** spørgsmål om test er i gang */
 	public static boolean test() {
 		String spm = "Køres med test-udskrifter?";

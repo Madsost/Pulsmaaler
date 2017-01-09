@@ -25,7 +25,7 @@ public class Pulsberegner {
 		double max = middelVal + 1.1 * standardAfv;
 		System.out.println("Max er defineret til: " + max);
 		
-		toppe = findTop(data, max));
+		toppe = findTop(data, max);
 		int peakCount = toppe.size();
 		int j = peakCount -1;
 		double temp = 0;
