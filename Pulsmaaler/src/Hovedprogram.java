@@ -1,6 +1,4 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 
 public class Hovedprogram {
@@ -8,27 +6,67 @@ public class Hovedprogram {
 	public static int sampleTime = 5;
 	public static int sampleSize;
 	public static ArrayList<Double> data;
-	/*
-	public static returParameter førsteKonvertering(parameter){
+	public static ArrayList<Double> data200;
+
+	/**
+	 * til den første konvertering. konverterer de første 1000 målinger og
+	 * returnerer listen
+	 */
+	public static ArrayList<Double> førsteKonvertering(ArrayList<String> listen, ArrayList<Double> data) {
 		// Konverter den første måling (fx 1000 målinger)
-		// Indfør tjek på om målingen faktisk er et tal 
+		// Indfør tjek på om målingen faktisk er et tal
 		// Returner data-arraylisten
+		for (String p : listen) {
+			p = p.trim();
+			try {
+				Double.parseDouble(p);
+			} catch (NumberFormatException e) {
+				continue;
+			}
+			data.add(Double.parseDouble(p));
+		}
+		System.out.println("Data er nu " + data.size() + " lang");
+		return data;
 	}
-	
-	public static returParameter konverter(parameter){
+
+	/**
+	 * fjerner de første x målinger, indsætter det samme antal nye målinger,
+	 * konverterer og returnerer listen
+	 */
+	public static ArrayList<Double> konverter(ArrayList<String> listen, ArrayList<Double> data) {
 		// Fjerner et antal målinger
 		// Indsætter det samme antal nye målinger
 		// konverter tal
 		// tjek at målingen er et tal
 		// Returner data-arraylisten
+		data.subList(0, sampleSize).clear();
+		for (String p : listen) {
+			p = p.trim();
+			try {
+				Double.parseDouble(p);
+			} catch (NumberFormatException e) {
+				continue;
+			}
+			data.add(Double.parseDouble(p));
+		}
+		return data;
 	}
-	
-	public static void opretFil(parameter){
+
+	/**
+	 * sletter filen for at sikre, at der kun gemmes for den nuværende session
+	 */
+	public static void sletFil() {
 		// tjek om fil eksisterer
 		// hvis filen eksisterer, slet den
 		// ellers opret filen
+		File f = new File("Rå data.txt");
+		File f1 = new File("Maalinger.txt");
+		if (f.exists())
+			f.delete();
+		if (f1.exists())
+			f1.delete();
 	}
-	*/
+
 	/** spørgsmål om test er i gang */
 	public static boolean test() {
 		String spm = "Køres med test-udskrifter?";
@@ -48,18 +86,16 @@ public class Hovedprogram {
 		else
 			return false;
 	}
-	
+
 	/** gem til fil */
 	public static void gemListeTilFil(ArrayList<Double> liste) {
-		// TODO: Tjek om filen eksisterer - hvis den gør, slet
 		try {
 			FileWriter fil = new FileWriter("Rå data.txt", true);
 			PrintWriter ud = new PrintWriter(fil);
 			for (int i = 0; i < liste.size(); i++) {
-				//ud.println(i + ": " + liste.get(i));
+				// ud.println(i + ": " + liste.get(i));
 				ud.println(liste.get(i));
 			}
-
 			ud.close();
 			System.out.println("Skrevet til fil");
 		} catch (IOException e1) {
@@ -69,7 +105,6 @@ public class Hovedprogram {
 
 	/** gem til fil */
 	public static void gemTilFil(double puls) {
-		// TODO: Tjek om filen eksisterer - hvis den gør, slet
 		try {
 			FileWriter fil = new FileWriter("Maalinger.txt", true);
 			PrintWriter ud = new PrintWriter(fil);
@@ -85,6 +120,7 @@ public class Hovedprogram {
 	}
 
 	public static void main(String[] args) {
+		sletFil();
 		// Tjekker om programmet skal køres med
 		// testudskrifter
 		boolean test = test();
@@ -117,46 +153,57 @@ public class Hovedprogram {
 		double puls = 0;
 		sampleSize = 1000;
 
+		// Modtager de første målinger
 		listen = t.getValue(sampleSize);
-		for (String p : listen) {
-			p = p.trim();
-			try{ Double.parseDouble(p); } catch(NumberFormatException e){ continue; }
-			//if(Double.isNaN(Double.parseDouble(p))) continue;
-			data.add(Double.parseDouble(p));
-		}
+
 		System.out.println("Vi er begyndt!");
 		pulsB = new Pulsberegner(sampleSize, sampleTime);
+		double t1 = System.currentTimeMillis();
+
+		// Beregn puls af første målinger
+		data = førsteKonvertering(listen, data);
+		puls = pulsB.beregnPuls(data);
 		System.out.println("Pulsen er inden start: " + puls);
+		gemListeTilFil(data);
 
-		sampleSize = 600;
+		if (puls > 0) {
+			gemTilFil(puls);
+		} else
+			System.out.println("Dårlig måling - fortsætter");
+
+		counter++; // bruges til at skrive tid i filen
+		double t2 = System.currentTimeMillis();
+		System.out.println("Det tog: " + (t2 - t1) + "ms");
+		System.out.println("Pulsen var: " + puls + " bpm");
+
+		// Programmet er klart - begynder uendelig løkke
 		for (;;) {
-			data.subList(0, sampleSize).clear();
+			t1 = System.currentTimeMillis();
+			sampleSize = 600;
 
+			// henter målinger, fjerner de første sampleSize målinger
 			listen = t.getValue(sampleSize);
-			
-			double t1 = System.currentTimeMillis();
-			for (String p : listen) {
-				// System.out.println(p);
-				data.add(Double.parseDouble(p));
+			data = konverter(listen, data);
+
+			// tilføjer de nye målinger til filen
+			data200 = new ArrayList<>();
+			for (int i = (data.size() - sampleSize); i < data.size(); i++) {
+				data200.add(data.get(i));
 			}
+
 			System.out.println("Data er nu " + data.size() + " lang");
 
 			puls = pulsB.beregnPuls(data);
-			gemListeTilFil(data);
-			
-			if (puls == 7 && prevPuls != 0)
-				puls = prevPuls;
+			gemListeTilFil(data200);
+
 			if (puls > 0) {
-				// if (puls > (1.1 * prevPuls) && prevPuls != 0)
-				// puls = 1.1 * prevPuls;
 				gemTilFil(puls);
 			} else
 				System.out.println("Dårlig måling - fortsætter");
 			counter++;
-			double t2 = System.currentTimeMillis();
+			t2 = System.currentTimeMillis();
 			System.out.println("Det tog: " + (t2 - t1) + "ms");
 			System.out.println("Pulsen var: " + puls + " bpm");
-			prevPuls = puls;
 		}
 	}
 }
