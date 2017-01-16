@@ -4,14 +4,15 @@ import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 /**
- * Sensor-klasse
- * 
- * Indhenter måling fra en serielt tilsluttet sensor Arduinoen måler hvert 5.
+ * Klasse til kommunikation med Arduinoen og derigennem sensoren.
+ * <p>
+ * Indhenter målinger fra en serielt tilsluttet Arduino, der måler hvert 5.
  * ms.
- * 
+ * <p>
  * Indeholder en metode til at hente målinger, til at rense den første måling og
  * en opsætningsmetode. Returnerer en liste med sample_size størrelse med
  * målinger.
+ * @author Mads og Mikkel
  */
 
 public class Sensor {
@@ -23,9 +24,12 @@ public class Sensor {
 
 	/**
 	 * opsætter den serielle port og melder at data terminalen er klar til at
-	 * modtage data
+	 * modtage data.<p>
+	 * Anvender JSSC biblioteket. Kræver at der kun er tilsluttet én seriel
+	 *  forbindelse til programmet, da det antages at der kun er en port i brug.<p>
+	 * Returnerer intet.
 	 */
-	public void setup() {
+	public void opsaet() {
 		try {
 			String[] portNames = SerialPortList.getPortNames();
 			String port = portNames[0];
@@ -33,7 +37,7 @@ public class Sensor {
 			serialPort.openPort(); // Open serial port
 			serialPort.setParams(19200, 8, 1, 0); // Set params.
 			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
-			serialPort.setDTR(true);
+			serialPort.setDTR(true); // Arduinoen er ligeglad
 		} catch (ArrayIndexOutOfBoundsException b) {
 			System.out.println("Der var ikke tilsluttet nogen enheder");
 		} catch (SerialPortException ex) {
@@ -42,19 +46,27 @@ public class Sensor {
 	}
 
 	/**
-	 * Kalder mål() og returnerer en liste med det antal målinger, som
-	 * parameteren bestemmer
+	 * Kalder mål() med parameteren og returnerer en liste med det antal målinger fra Arduinoen som parameteren bestemmer.
+	 *  
+	 * @param sampleSize det ønskede antal målinger, som heltal.
+	 * @return målinger: en ArrayList af strenge, hvor hver plads indeholder en måling.
 	 */
-	public ArrayList<String> getValue(int sampleSize) {
-		mål(sampleSize);
+	public ArrayList<String> hentMaalinger(int sampleSize) {
+		maal(sampleSize);
 		return målinger;
 	}
 
 	/**
-	 * Modtager målinger fra sensoren, skiller dem ad og tilføjer dem til en
-	 * liste
+	 * Ansvarlig for hentning af målinger. 
+	 * Denne metode modtager en heltalsparameter, som bestemmer antallet af målinger der skal hentes.
+	 * Metoden består af en løkke, som henter værdier fra den serielle port indtil parameter-værdien er nået.
+	 * Hvis <code>InputBuffer</code> er tom, ventes der i 75 ms.
+	 * <p> 
+	 * Returnerer intet, men gemmer til listen <code>målinger</code>, som kan tilgås med <code>hentMålinger</code>
+	 * 
+	 * @param sampleSize det ønskede antal målinger, som heltal.
 	 */
-	public void mål(int sampleSize) {
+	public void maal(int sampleSize) {
 		int point = 0;
 		// instantierer listen - således gemmes kun sample_size for hvert kald
 		målinger = new ArrayList<>(sampleSize);
@@ -86,7 +98,7 @@ public class Sensor {
 			// Udskriver et punktum for hvert 200 måling (ca. hvert sekund)
 			if (målinger.size() - point >= 200) {
 					System.out.print(".");
-					point = (målinger.size() / 200) * 200;
+					point = målinger.size();
 				}
 			if (test) {
 				System.out.println(målinger.size());
@@ -97,8 +109,11 @@ public class Sensor {
 		System.out.println();
 	}
 
-	/** Rydder den første måling, da de første målinger typisk er fejlagtige */
-	public void clear() {
+	/** 
+	 * Rydder den første måling, da de første målinger typisk er fejlagtige. <p>
+	 * De første målinger i <code>InputBuffer</code> aflæses, opdeles i enkelte målinger og slettes.
+	 */
+	public void rens() {
 		try {
 			// hvis der er målinger på vej
 			if (serialPort.getInputBufferBytesCount() > 0) {

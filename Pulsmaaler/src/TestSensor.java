@@ -9,12 +9,15 @@ import java.util.ArrayList;
 public class TestSensor extends Sensor {
 
 	private boolean test = false;
-	public double count = 0.01;
+	public double count = 2;
 	private ArrayList<String> målinger;
 
 	/**
-	 * Pulsfunktion - indeholder den funktion, som simulerer en puls Modtager et
-	 * tal, som bruges som variablen i funktionen.
+	 *  Pulsfunktion - indeholder den funktion, som simulerer en puls.<p>
+	 *  Modtager et tal, som bruges som variablen i funktionen.
+	 *  
+	 * @param x 	en x-værdi. Det er denne parameter, som skal inkementeres
+	 * @return 		y-værdien for parameteren.
 	 */
 	public double pulsfunktion(double x) {
 		double funktion = -1 * Math.sin(8 * x) + 1.5 * Math.cos(4 * x) + 2;
@@ -25,7 +28,7 @@ public class TestSensor extends Sensor {
 	 * svarer til getValues i Sensor-klassen. Venter 5ms for at matche arduinoen
 	 */
 	@Override
-	public ArrayList<String> getValue(int sample_size) {
+	public ArrayList<String> hentMaalinger(int sample_size) {
 		målinger = new ArrayList<>();
 		int point = 0;
 		for (int i = 0; i < sample_size; i++) {
